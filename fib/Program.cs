@@ -9,7 +9,8 @@ using System;
 var supportedLanguages = new Dictionary<string, List<string>>()
 {
 
-    { "ALL", new List<string> { ".txt" } },
+    { "ALL", new List<string> {} },
+    { "TEXT", new List<string> { ".txt" } },
     { "PYTHON", new List<string> { ".py", ".ipynb" } },
     { "CSHARP", new List<string> { ".cs" } },
     { "JAVA", new List<string> { ".java" } },
@@ -46,9 +47,6 @@ var supportedLanguages = new Dictionary<string, List<string>>()
     { "OCAML", new List<string> { ".ml", ".mli" } },
     { "F#", new List<string> { ".fs", ".fsi" } }
 };
-
-
-
 
 var rootCommand = new RootCommand("CLI for bundling code files.");
 
@@ -105,11 +103,10 @@ authorOption.AddAlias("-a");
 bundleCommand.AddOption(authorOption);
 
 bundleCommand.SetHandler((FileInfo output, string language, bool note, string sort, bool removeEmptyLines, string author) =>
-{ 
+{
     try
     {
         string outputPath = Path.IsPathRooted(output.FullName) ? output.FullName : Path.Combine(Directory.GetCurrentDirectory(), output.Name);
-
         if (File.Exists(outputPath))
         {
             throw new IOException("Output file already exists. Please choose a different name.");
@@ -123,15 +120,14 @@ bundleCommand.SetHandler((FileInfo output, string language, bool note, string so
             }
             if (sort == "type")
             {
-                codeFiles = codeFiles.OrderBy(file => Path.GetExtension(file)).ToList(); 
+                codeFiles = codeFiles.OrderBy(file => Path.GetExtension(file)).ToList();
             }
             else
             {
-                codeFiles = codeFiles.OrderBy(file => file).ToList(); 
+                codeFiles = codeFiles.OrderBy(file => file).ToList();
             }
             using (var bundleStream = new StreamWriter(fileStream))
             {
-
                 if (!string.IsNullOrEmpty(author))
                 {
                     bundleStream.WriteLine($"// Author: {author}");
@@ -141,29 +137,26 @@ bundleCommand.SetHandler((FileInfo output, string language, bool note, string so
                 {
                     try
                     {
-
-
-                    var fileContent = File.ReadAllText(file);
-                    if (removeEmptyLines)
-                    {
-                        fileContent = string.Join("\n", fileContent.Split('\n').Where(line => !string.IsNullOrWhiteSpace(line)));
+                        var fileContent = File.ReadAllText(file);
+                        if (removeEmptyLines)
+                        {
+                            fileContent = string.Join("\n", fileContent.Split('\n').Where(line => !string.IsNullOrWhiteSpace(line)));
+                        }
+                        if (note)
+                        {
+                            bundleStream.WriteLine($"// Source: {file}");
+                        }
+                        bundleStream.WriteLine(fileContent);
                     }
-                    if (note)
-                    {
-                        bundleStream.WriteLine($"// Source: {file}");
-                    }
-                    bundleStream.WriteLine(fileContent);
-                    }
-                    catch (Exception ex )
+                    catch (Exception ex)
                     {
                         Console.WriteLine($"Error reading file {file}: {ex.Message}");
                     }
                 }
             }
         }
-
         Console.WriteLine($"Files bundled successfully into {outputPath}");
-    } 
+    }
     catch (DirectoryNotFoundException dirEx)
     {
         Console.WriteLine($"Directory not found: {dirEx.Message}");
@@ -173,15 +166,13 @@ bundleCommand.SetHandler((FileInfo output, string language, bool note, string so
         Console.WriteLine($"File not found: {fileEx.Message}");
     }
     catch (PathTooLongException pathEx)
-{
-    Console.WriteLine($"Path too long: {pathEx.Message}");
-}
-
+    {
+        Console.WriteLine($"Path too long: {pathEx.Message}");
+    }
     catch (IOException ioEx)
     {
         Console.WriteLine($"IO Error: {ioEx.Message}");
     }
-
     catch (UnauthorizedAccessException authEx)
     {
         Console.WriteLine($"Access Error: {authEx.Message}");
@@ -190,7 +181,6 @@ bundleCommand.SetHandler((FileInfo output, string language, bool note, string so
     {
         Console.WriteLine($"Format Error: {formatEx.Message}");
     }
-
     catch (Exception ex)
     {
         Console.WriteLine($"Error: {ex.Message}");
@@ -206,8 +196,6 @@ createRspCommand.SetHandler((InvocationContext context) =>
 {
     try
     {
-
-
         Console.Write("Enter language: ");
         var language = Console.ReadLine();
 
@@ -264,9 +252,6 @@ List<string> GetFilesToBundle(Dictionary<string, List<string>> languages, string
             .SelectMany(lang => languages[lang])
             .ToList();
     }
-
-
-    // קבלת הקובץ היעד
 
     var codeFiles = Directory.GetFiles(outputPath, "*.*", SearchOption.AllDirectories)
         .Where(file => fileExtensionsToInclude.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
