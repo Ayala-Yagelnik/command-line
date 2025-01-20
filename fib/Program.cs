@@ -215,7 +215,7 @@ createRspCommand.SetHandler((InvocationContext context) =>
         var author = Console.ReadLine();
         using (var responseFile = new StreamWriter("command.rsp"))
         {
-            responseFile.WriteLineAsync($"bundle --language {language} --output {outputName} --note {note} --sort {sort} --remove-empty-lines {removeEmptyLines} --author \"{author}\"");
+            responseFile.WriteLine($"bundle --language {language} --output {outputName} --note {note} --sort {sort} --remove-empty-lines {removeEmptyLines} --author \"{author}\"");
         }
         Console.WriteLine($"Response file created: command.rsp");
     }
